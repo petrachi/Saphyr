@@ -1,9 +1,13 @@
 alpha = 12
 beta = 2
 result = alpha + beta
+print("12 + 2 = ")
 print(result)
-alpha = 16
-delta = "16"
+newline(2)
+
+alpha = 28
 print(result)
+newline
+
 result = alpha + beta
-print(alpha, beta, result)
+print(alpha, "+", beta, "=", result)

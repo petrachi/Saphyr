@@ -1,23 +1,42 @@
 module Saphyr
-  require './saphyr/character.rb'
-  require './saphyr/scanner.rb'
+  module Core
+    require './saphyr/core/binding.rb'
+    require './saphyr/core/kernel.rb'
+    require './saphyr/core/number.rb'
+    require './saphyr/core/string.rb'
+  end
 
-  require './saphyr/token.rb'
-  require './saphyr/lexer.rb'
+  module VM
+    require './saphyr/vm/character.rb'
+    require './saphyr/vm/scanner.rb'
 
-  require './saphyr/node.rb'
-  require './saphyr/parser.rb'
+    require './saphyr/vm/token.rb'
+    require './saphyr/vm/lexer.rb'
 
+    require './saphyr/vm/node.rb'
+    require './saphyr/vm/parser.rb'
 
-  #######################################
-  x = Lexer.new(File.open("nnx.sy").read)
-  x.tokenize
-  p *x.instance_variable_get("@tokens")
-  #######################################
-  x = Parser.new(File.open("nnx.sy").read)
-  x.parse
-  p *x.instance_variable_get("@root")
-  #####################################
+    require './saphyr/vm/compiler.rb'
+
+    #######################################
+    # x = Lexer.new(File.open("nnx.sy").read)
+    # x.tokenize
+    # p *x.instance_variable_get("@tokens")
+    #######################################
+    # x = Parser.new(File.open("nnx.sy").read)
+    # x.parse
+    # p *x.instance_variable_get("@root")
+    #####################################
+    # p "#"*45
+    # x = Compiler.new(File.open("nnx.sy").read)
+    # x.compile
+    #####################################
+  end
+
+  def self.[] file_path
+    Saphyr::VM::Compiler.new(File.open(file_path).read).compile
+  end
+
 
 
   ################################
@@ -48,7 +67,7 @@ module Saphyr
   # alpha = 12
   # beta = 2
   # result = alpha + beta
-  # print result
+  # print(result)
   #
   # =
   #   alpha
@@ -66,7 +85,7 @@ module Saphyr
   #
   # assign("alpha", 12)
   # assign("beta", 2)
-  # assign("result", add(exec("alpha"), exec("beta")))
+  # assign("result", exec("alpha").add(exec("beta")))
   # print(exec("result"))
   #
   ##########################
