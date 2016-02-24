@@ -1,9 +1,9 @@
 alpha = 12
 beta = 2
 result = alpha + beta
-print result
+print(result)
 alpha = 16
 delta = "16"
-print result
-result = alpha + beta
 print(result)
+result = alpha + beta
+print(alpha, beta, result)

@@ -8,7 +8,7 @@ module Saphyr
 
     STRING_STARTCHARS = ["'", '"']
 
-    ONE_CHAR_SYMBOLS = ["=", "+", ".", "\n"]
+    ONE_CHAR_SYMBOLS = ["=", "+", ".", "(", ",", ")", "\n"]
     TWO_CHAR_SYMBOLS = ["=="]
     WHITESPACE_CHARS  = [" ", "\t"]
 
