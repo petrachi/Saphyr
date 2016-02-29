@@ -3,19 +3,19 @@ class Saphyr::VM::Parser
 
   def initialize source_code
     @lexer = Saphyr::VM::Lexer.new source_code
-    @root = Saphyr::VM::Node.new Saphyr::VM::Token.new('', '', 0, 0)
+    @root = Saphyr::VM::Node.root
   end
 
   def parse
-    @lexer.tokenize
+    lexer.tokenize
 
     begin
-      parse_token @root
-    end while @lexer.peek
+      parse_token root
+    end while lexer.peek
   end
 
   def parse_token parent_node
-    token = @lexer.get
+    token = lexer.get
 
     case token.type
     when 'SYMBOL'
@@ -36,18 +36,32 @@ class Saphyr::VM::Parser
     when "("
       begin
         parse_token parent_node.last_child
-      end while @lexer.current.content != ")"
+      end while lexer.current.content != ")"
 
     when ")"
       # stop
     when ','
       # stop
-    else
+    when '='
+      node = parent_node.last_child.swap token
+
+      stop_symbol = case lexer.peek.content
+      when "\n"
+        ";"
+      else
+        "\n"
+      end
+
+      begin
+        parse_token node
+      end while lexer.current.content != stop_symbol
+      
+    when "."
       node = parent_node.last_child.swap token
 
       begin
         parse_token node
-      end while @lexer.current.content != "\n"
+      end while lexer.current.content != "\n"
     end
   end
 

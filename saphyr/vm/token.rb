@@ -9,6 +9,6 @@ class Saphyr::VM::Token
   end
 
   def inspect
-    "#{@type}: #{@content.inspect} at [#{@line}, #{@column}]"
+    "#{ type }: #{ content.inspect } at [#{ line }, #{ column }]"
   end
 end

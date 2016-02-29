@@ -1,4 +1,6 @@
 class Saphyr::VM::Scanner
+  attr_accessor :characters, :index, :source_code
+
   def initialize source_code
     @source_code = source_code
     @characters = []
@@ -11,7 +13,7 @@ class Saphyr::VM::Scanner
     line_number = 0
     column_number = 0
 
-    @source_code.each_line.map do |line|
+    source_code.each_line.map do |line|
       line_number += 1
       column_number = 0
 
@@ -19,21 +21,20 @@ class Saphyr::VM::Scanner
         index_number += 1
         column_number += 1
 
-        @characters << Saphyr::VM::Character.new(char, index_number, line_number, column_number)
+        characters << Saphyr::VM::Character.new(char, index_number, line_number, column_number)
       end
     end
   end
 
   def get
-    @index += 1
-    @characters[@index]
+    characters[self.index += 1]
   end
 
   def current
-    @characters[@index]
+    characters[index]
   end
 
   def peek
-    @characters[@index + 1]
+    characters[index + 1]
   end
 end

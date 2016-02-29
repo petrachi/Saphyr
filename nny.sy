@@ -1,0 +1,112 @@
+# TRY 1
+# Problem : As 'Toto' is a method, each time the 'Toto' identifier is found, it triggers the method execution
+# this means that on line 2, I assign the 'prototype' method to a 'new Object',
+# and that on line 3, I try to call 'prototype' on another 'new Object', so on that 'Object', as it is new, the 'prototype' method is not yet defined
+#
+# CODE
+# Toto = Object.new
+# Toto.prototype = Object.new
+# Toto.prototype.toto = "toto"
+# Toto.new =
+#   instance = Object.new
+#   instance.class = self
+#   instance.methods = self.prototype.methods
+#   instance;
+#
+# obj = Toto.new
+# obj.toto.print
+
+# WHAT: surcharge de la méthode "toto", qui ne doit pas provoquer un stack overflow
+# Dans la partie droite du signe "=", 'obj.toto' désigne l'ancienne implémentation de 'obj.toto'.
+# Le résultat devrait être "toto tata" lors du print
+#
+# CODE:
+# obj.toto = obj.toto + " tata"
+# obj.toto.print
+###############################
+
+
+# ALTERNATIVE VERSION
+#
+# Toto =
+#   prototype =
+#     toto = "toto";
+#   new =
+#     instance =
+#       class = self
+#       methods = prototype.methods;
+#     instance;
+#
+# obj = Toto.new
+# obj.toto.print
+#
+# EXPLAINED
+# je déclare une méthode 'Toto'
+# dans cette méthode, je déclare une sous-méthode 'protitype'
+# dans cette sous méthode, je déclare une sous-méthode 'toto', qui produit la string "toto"
+# dans 'Toto', je déclare une sous méthode 'new'
+# dans cette sous méthode, je déclare une sous-méthode 'instance'
+# dans instance, je déclare "class" qui produit 'toto', et methods qui produit 'prototype.mlethods'
+# la sous méthode 'new' produit 'instance'
+# dans le contexte global, je déclare une méthode 'obj', qui produit 'toto.new'
+# j'execute obj.toto.print
+#
+# WHY
+# le probléme avec la version actuelle, c'est que 'TOTO' est exécuté à chaque fois, donc quand j'assigne 'prototype' à 'TOTO', puis que j'appelle 'TOTO.prototype', les deux 'TOTO' ne désignent pas la même valeur (car la seconde fois, TOTO à produit encore un object.new), donc la méthode 'prototype' est lié à un objet qui n'est plus accessible.
+# Il faut pouvoir garder la sous-méthode 'prototype' accessible
+# Pour ça, il faut soit différencier méthode et valeur (ce que je voudrait éviter)
+# Soit, différencier "accéder à l'objet methode que désigne cet identifier", et "exécuter la méthode que désigne cet identifier"
+#############################
+
+
+
+# TRY 2
+# Problem : what we thought was a local variable 'obj' is in fact a method,
+# so each time I call obj, I execute the 'obj' method, which create a new 'Toto' instance
+# in fact, in the code, i could replace 'obj' by 'Toto.new'
+# so, we don't deal here with a value, and that's a proble
+# to solve this, I think we need to add parameters to methods, so we could write smthng like 'Toto.new(obj)',
+# where 'obj' is now a value, and the method 'Toto.new' modifies this value, by giving it class an methods
+
+# CODE
+Toto.prototype.toto = "toto"
+Toto.new =
+  "creating a new 'TOTO'".print
+  instance.class = self
+  instance.methods = self.prototype.methods
+  instance;
+
+obj = Toto.new
+obj.toto.print
+"\n".print
+obj.print
+"\n".print
+#
+#
+# EXPLAINED
+# il faut différentier valeur et méthode
+# on se passe de la phase de déclaration, par défaut, un identifier est un 'Object.new' (les object sont des conteners de méthodes)
+# les méthodes sont définies sur l'action '='
+# sur la premiere ligne : Toto est un object, prototype est un object, toto est une méthode
+##################################
+
+
+
+# CODE
+# Toto = Object.new
+# Toto.prototype = Object.new
+# Toto.prototype.toto = "toto"
+# Toto.new =
+#   instance = Object.new
+#   instance.class = self
+#   instance.methods = self.prototype.methods
+#   instance;
+#
+# obj = Toto.new()
+# obj.toto().print
+#
+# EXPLAINED
+# tout est méthode
+# mais de base, un identifier ne déclenche pas l'exécution de la méthode, mais renvoie l'objet méthode
+# la méthode sera exécutée uniquement lorsque des '()' sont mis à la fin (un peu comme en javascript)
+# -> le probléme c'est que du coup, on déclare des méthodes qui ne seront jamais exécutées, comme 'Toto' ici, donc définir le corps de la méthode semble un peu abstrait

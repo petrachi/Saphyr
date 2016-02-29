@@ -1,5 +1,9 @@
 class Saphyr::VM::Node
-  attr_accessor :token, :level, :parent, :children
+  attr_accessor :children, :level, :parent, :token
+
+  def self.root
+    new Saphyr::VM::Token.new('', '', 0, 0)
+  end
 
   def initialize token
     @token = token
@@ -26,9 +30,6 @@ class Saphyr::VM::Node
   end
 
   def swap_node node
-    # p self
-    # p self.parent
-
     parent.children.delete(self)
 
     node.level = level
@@ -45,10 +46,10 @@ class Saphyr::VM::Node
   end
 
   def last_child
-    @children.last
+    children.last
   end
 
   def inspect
-    "#{ "\t"*@level }#{ @token.content };\n" + children.map(&:inspect).join
+    "#{ "\t" * level }#{ token.content }(#{ token.line }, #{ token.column });\n" + children.map(&:inspect).join
   end
 end

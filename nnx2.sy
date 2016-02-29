@@ -1,0 +1,17 @@
+alpha = 12
+beta = 2
+result = alpha + beta
+"12 + 2 = ".print
+result.print
+
+alpha = 28
+result.print
+
+result = alpha + beta
+str = alpha.to_s + "+" + beta.to_s + "=" + result.to_s
+str.print
+
+
+# I can't do this one cause current methods don't take in arguments
+# And to do "alpha + beta", I need to be able to compile into "alpha.add(beta)"
+# So, the "add" compiled method must accept an argument

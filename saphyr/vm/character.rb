@@ -1,5 +1,5 @@
 class Saphyr::VM::Character
-  attr_accessor :content, :index, :line, :column
+  attr_accessor :column, :content, :index, :line
 
   def initialize content, index, line, column
     @content = content
@@ -9,6 +9,6 @@ class Saphyr::VM::Character
   end
 
   def inspect
-    "#{@content} at #{@index}[#{@line}, #{@column}]"
+    "#{ content } at #{ index }[#{ line }, #{ column }]"
   end
 end

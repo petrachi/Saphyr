@@ -1,7 +1,11 @@
 module Saphyr
   module Core
-    require './saphyr/core/binding.rb'
-    require './saphyr/core/kernel.rb'
+    # require './saphyr/core/binding.rb'
+    # require './saphyr/core/kernel.rb'
+
+    require './saphyr/core/method.rb'
+    require './saphyr/core/object.rb'
+
     require './saphyr/core/number.rb'
     require './saphyr/core/string.rb'
   end
@@ -17,24 +21,49 @@ module Saphyr
     require './saphyr/vm/parser.rb'
 
     require './saphyr/vm/compiler.rb'
+    require './saphyr/vm/driver.rb'
 
-    #######################################
-    # x = Lexer.new(File.open("nnx.sy").read)
-    # x.tokenize
-    # p *x.instance_variable_get("@tokens")
-    #######################################
-    # x = Parser.new(File.open("nnx.sy").read)
-    # x.parse
-    # p *x.instance_variable_get("@root")
-    #####################################
-    # p "#"*45
-    # x = Compiler.new(File.open("nnx.sy").read)
-    # x.compile
-    #####################################
+
+    # idea
+    # supprimmer le binding, string et number
+    # modifier le kernel pour le transformer en "class Object"
+    # la "class Object" définit la lecture écriture des variables/méthodes
+    # toutes les classes hérites de Object
+    # le contexte de base est une instance d'Object, définie dans une constante, et accessible via une méthode "main"
+    # de cette façon, tout le reste peut etre écrit en saphyr
+    # même le mot clé "class" peut être une méthode de "main"
+    # et le 'main' pourra faire le lien entre saphyr et ruby (pour instancier en syntaxic sugar des nombres, string, array, hash, ...) (ou sucre syntaxique pour des méthodces genre +, -, *, /, ...)
   end
 
   def self.[] file_path
-    Saphyr::VM::Compiler.new(File.open(file_path).read).compile
+    #######################################
+    x = Saphyr::VM::Scanner.new(File.open(file_path).read)
+    x.scan
+    p "STEP 1 : Scan"
+    p "#############"
+    p *x.characters
+    print *["\n"]*3
+    #######################################
+    x = Saphyr::VM::Lexer.new(File.open(file_path).read)
+    x.tokenize
+    p "STEP 2 : Tokenize"
+    p "#################"
+    p *x.tokens
+    print *["\n"]*3
+    #######################################
+    x = Saphyr::VM::Parser.new(File.open(file_path).read)
+    x.parse
+    p "STEP 3 : Parse"
+    p "##############"
+    p *x.root
+    print *["\n"]*3
+    #####################################
+
+    p "STEP 4 : Compile"
+    p "##############"
+
+
+    Saphyr::VM::Driver.new(File.open(file_path).read).process
   end
 
 
@@ -104,5 +133,104 @@ module Saphyr
   # exec("a")
   #
   ##########################
+  #
+  # CODE
+  #
+  # Toto = Object.new
+  # Toto.prototype = Object.new
+  # Toto.prototype.toto = "toto"
+  # Toto.new =
+  #   instance = Object.new
+  #   instance.class = self
+  #   instance.methods = self.prototype.methods
+  #   instance;
+  #
+  # obj = Toto.new
+  # print obj.toto
+  #
+  # AST
+  #
+  # =
+  #   Toto
+  #   .
+  #     Object
+  #     new
+  # .
+  #   Toto
+  #   =
+  #     prototype
+  #     .
+  #       Object
+  #       new
+  # .
+  #   Toto
+  #   .
+  #     prototype
+  #     =
+  #       toto
+  #       "toto"
+  # .
+  #   Toto
+  #   =
+  #     new
+  #     =
+  #       instance
+  #       .
+  #         Object
+  #         new
+  #     .
+  #       instance
+  #       =
+  #         class
+  #         Toto
+  #     .
+  #       instance
+  #       =
+  #         methods
+  #         .
+  #           Toto
+  #           .
+  #             prototype
+  #             methods
+  #     instance
+  # =
+  #   obj
+  #   .
+  #     Toto
+  #     new
+  # .
+  #   obj
+  #   .
+  #     toto
+  #     print
+  #
+  # COMPILE
+  #
+  # main.define_method("Toto", ast(main.exec_method("Object").exec_method("new")))
+  # main.exec_method("Toto").define_method("prototype", ast(main.exec_method("Object").exec_method("new")))
+  # main.exec_method("Toto").exec_method("prototype").define_method("toto"), ast("toto"))
+  # main.exec_method("Toto").define_method("new", ast(
+  #   self.define_method("instance", ast(self.exec_method("Object").exec_method("new")))
+  #   self.exec_method("instance").define_method("class", ast(self.exec_method("self")))
+  #   self.exec_method("instance").define_method("methods", ast(self.exec_method("self").exec_method("prototype").exec_methods("methods")))
+  #   self.exec_method("instance")
+  # ))
+  # main.define_method("obj", ast(main.exec_method("Toto").exec_method("new")))
+  # main.exec_method("obj").exec_method("toto").exec_method("print")
+  #
+  ##########################
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 end
