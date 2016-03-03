@@ -1,17 +1,33 @@
 class Saphyr::VM::Parser
-  attr_accessor :lexer, :root
+  attr_accessor :lexer, :parsed, :root
+
+  def self.parse_tokens tokens
+    lexer = Saphyr::VM::Lexer.new ''
+    lexer.tokens = tokens
+    lexer.tokenized = true
+
+    parser = Saphyr::VM::Parser.new ''
+    parser.lexer = lexer
+    parser.parse
+    parser.root
+  end
 
   def initialize source_code
     @lexer = Saphyr::VM::Lexer.new source_code
+
     @root = Saphyr::VM::Node.root
+    @parsed = false
   end
 
   def parse
+    parsed and return
     lexer.tokenize
 
     begin
       parse_token root
     end while lexer.peek
+
+    self.parsed = true
   end
 
   def parse_token parent_node
@@ -35,8 +51,15 @@ class Saphyr::VM::Parser
       # stop
     when "("
       begin
-        parse_token parent_node.last_child
-      end while lexer.current.content != ")"
+        tokens = []
+
+        begin
+          tokens << lexer.get
+        end while ![",", ")"].include? lexer.current.content
+
+        parent_node.last_child.merge Saphyr::VM::Parser.parse_tokens(tokens)
+
+      end while lexer.current.content != ")" && lexer.peek
 
     when ")"
       # stop
@@ -45,6 +68,8 @@ class Saphyr::VM::Parser
     when '='
       node = parent_node.last_child.swap token
 
+
+
       stop_symbol = case lexer.peek.content
       when "\n"
         ";"
@@ -52,16 +77,21 @@ class Saphyr::VM::Parser
         "\n"
       end
 
+# p node
+# p stop_symbol
+
+
       begin
         parse_token node
-      end while lexer.current.content != stop_symbol
-      
+      #  p "parsing #{lexer.current.inspect}"
+      end while lexer.current.content != stop_symbol && lexer.peek
+      # p "found stop symbol"
     when "."
       node = parent_node.last_child.swap token
 
       begin
         parse_token node
-      end while lexer.current.content != "\n"
+      end while ![";", "\n"].include?(lexer.current.content) && lexer.peek
     end
   end
 

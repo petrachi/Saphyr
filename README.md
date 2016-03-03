@@ -24,12 +24,13 @@ Toto.new =
 ```
 Then, we declare inside the 'Toto' object a method named 'new'. Here we have a multi-line declaration, that means that the method body is everything until the ";" sign. This 'new' method, when executed, will define an object called 'instance', add a method 'class' to that object, in that context the keyword "self" points to the 'Toto' object. Then, using the "method" keyword, we assign into this 'instance' object every methods assigned to the 'Toto.prototype' object. Then, we return the 'instance' object.
 
-
+--
 ```
 obj = Toto.new
 ```
 Now, we declare in the global context a method named 'obj'.
 
+--
 ```
 obj.toto.print
 ```

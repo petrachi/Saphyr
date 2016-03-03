@@ -61,26 +61,32 @@
 
 
 # TRY 2
-# Problem : what we thought was a local variable 'obj' is in fact a method,
+# Problem 1 : what we thought was a local variable 'obj' is in fact a method,
 # so each time I call obj, I execute the 'obj' method, which create a new 'Toto' instance
 # in fact, in the code, i could replace 'obj' by 'Toto.new'
 # so, we don't deal here with a value, and that's a proble
 # to solve this, I think we need to add parameters to methods, so we could write smthng like 'Toto.new(obj)',
 # where 'obj' is now a value, and the method 'Toto.new' modifies this value, by giving it class an methods
-
+#
+# Problem 2 : dans la méthode 'Toto.new', je définit un object 'instance',
+# comme la méthode est exécutée dans 'Toto' (self == Toto), l'object 'instance' va être définit comme un 'local' de 'Toto'
+# Il faudrait plutôt que 'instance' soit définit comme un local de la méthode 'new', donc exécuter l'ast avec la méthode 'new' comme object
+# par contre, il faut toujours pouvoir accéder à 'Toto', via le mot clé 'self', ou peut-être via le mot clé 'owner'
+#
 # CODE
-Toto.prototype.toto = "toto"
-Toto.new =
-  "creating a new 'TOTO'".print
-  instance.class = self
-  instance.methods = self.prototype.methods
-  instance;
-
-obj = Toto.new
-obj.toto.print
-"\n".print
-obj.print
-"\n".print
+# Toto.prototype.toto = "toto"
+# Toto.new =
+#   "creating a new 'TOTO'".print
+#   instance.class = self
+#   instance.methods = self.prototype.methods
+#   instance;
+#
+# obj = Toto.new
+# obj.toto.print
+# Toto.instance.print
+# "\n".print
+# obj.print
+# "\n".print
 #
 #
 # EXPLAINED
@@ -89,6 +95,126 @@ obj.print
 # les méthodes sont définies sur l'action '='
 # sur la premiere ligne : Toto est un object, prototype est un object, toto est une méthode
 ##################################
+
+
+
+
+# TRY 3
+# Problem : lorsque je fais l.111 'instance.methods = self.prototype.methods',
+# en fait, je déclare une méthode 'methods', puisque le sens du signe "=" veut dire "définir une méthods"
+# pour éxécuter une action, il faut appeller une méthode, donc qqchose comme "instance.get_methods(self.prototyppe.methods)"
+# j'ai donc besoin des arguments pour les méthodes, mm probléme que Try2-Problem1
+#
+# CODE
+# Toto.prototype.toto = "toto"
+# Toto.new =
+#   "creating a new 'TOTO'".print
+#   "\n".print
+#   instance.class = self
+#   instance.methods = self.prototype.methods
+#   instance;
+#
+# "---------".print
+# Toto.prototype.methods.print
+#
+# obj = self.Toto.new
+# "---------".print
+# 0.print
+# obj.methods.print
+# "\n".print
+# 1.print
+# obj.toto.print
+# "\n".print
+# 2.print
+# Toto.instance.print
+# "\n".print
+# 3.print
+# obj.print
+# "\n".print
+
+# EXPLAINED
+# solving Try2-Problem2 -> résolu! (on peut voir que l'objet 'instance' est définit dans la méthode 'new', et plus dans l'objet 'Toto')
+###############################
+
+
+
+
+
+# TRY 4
+# working !
+#
+# CODE
+
+
+# youpi = 12 + 3
+# youpi.print
+# "\n***\n".print
+
+"\n/////\n".print
+a.b.c.d.e(f) = f.print
+g = 1
+h = 2
+a.b.c.d.e(g)
+a.b.c.d.e(h)
+
+a.b.c.d.e(f,g) =
+  f.print
+  g.print;
+
+a.b.c.d.e(g, h)
+a.b.c.d.e(self.g, self.h)
+"\n/////\n".print
+
+
+Toto.prototype.toto = "toto"
+Toto.new(object) =
+  "creating a new 'TOTO', based on:".print
+  "\n".print
+  object.methods.print
+
+  "\n".print
+
+  var = 12
+  object.pr_int(int) = int.print
+  object.pr_int(var)
+  # context of 'var' should be 'Toto.new', actual is 'object'
+
+  object.class = self
+  object.extend(self.prototype.methods)
+  object;
+
+
+"\n\n\n****************************\n".print
+"\n\n\nobj*************************\n".print
+obj.tryout = 1
+Toto.new(obj)
+# context of 'obj' should be 'main', actual is 'Toto'
+
+"\n\n\n****************************\n".print
+"\n\n\nnana************************\n".print
+Toto.nana.triiii = 1
+Toto.new(nana)
+
+
+"\n\n\n****************************\n".print
+"\n\n\ntoto************************\n".print
+
+"\n".print
+obj.methods.print
+
+"\n---\n".print
+obj.toto.print
+"\n---\n".print
+
+obj.methods.print
+"\n".print
+
+
+# EXPLAINED
+# solving Try2-Problem1 (equivalent to Try3-problem) : having parameters for methods
+###############################
+
+
 
 
 

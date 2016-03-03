@@ -6,7 +6,7 @@ class Saphyr::Core::String < Saphyr::Core::Object
     @intern = intern
   end
 
-  def exec_method name
+  def exec_local name
     # p "ruby method : exec method ''#{name}'' for #{self}"
     send name
   end

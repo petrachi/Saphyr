@@ -3,37 +3,56 @@ class Saphyr::Core::Object
 
   def initialize
     @locals = {}
-    @locals.define_singleton_method("print", ->{ ::Kernel.print self })
+    @locals.define_singleton_method("print", ->{ ::Kernel.print keys })
   end
 
-  def define_method name, ast
+  def __itself__
+    self
+  end
+
+  def define_method name, parameters, ast
     # p "defining method ''#{name}'' for #{self}"
     # p "ast look : #{ ast.inspect}"
 
-    locals[name] = Saphyr::Core::Method.new(name, ast)
+    locals[name] = Saphyr::Core::Method.new(name, parameters, ast)
+
+
+
+    #p "defining method ''#{name}'' -> #{locals[name]} for #{self}"
+    locals[name]
   end
 
-  def exec_method name
-    unless locals.has_key? name
-      # p "declaring a new object '#{name}' within self"
-      locals[name] = self.class.new
-    end
+  def define_local name
+    locals[name] = Saphyr::Core::Object.new
 
-    # p "calling '#{name}'"
-    locals[name].call self
+
+
+    #p "declaring a new object '#{name}' -> #{locals[name]} within #{self}"
+    locals[name]
   end
 
-  def self.exec_method name
-    # p "ruby method : exec method ''#{name}'' for #{self}"
-    send name
+  def find_local name
+    locals[name]
   end
 
-  def call object
-    object
+  def dup_locals locals
+    self.locals.merge! locals
   end
 
-  def methods
-    # return all methods objects (or all locals ?)
+  # def exec_local name, parameters
+  #
+  #   # p "calling '#{name}'"
+  #
+  #   locals[name].call self, parameters
+  # end
+
+  # def self.exec_method name
+  #   # p "ruby method : exec method ''#{name}'' for #{self}"
+  #   send name
+  # end
+
+  def call *_
+    self
   end
 
   def print

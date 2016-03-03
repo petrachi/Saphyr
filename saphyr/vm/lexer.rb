@@ -3,7 +3,7 @@ class Saphyr::VM::Lexer
   IDENTIFIER_CHARS = ('a'..'z').to_a + ('A'..'Z').to_a + (0..9).to_a + ["_"]
 
   NUMBER_STARTCHARS = ('0'..'9').to_a
-  NUMBER_CHARS = ('0'..'9').to_a + ["."]
+  NUMBER_CHARS = ('0'..'9').to_a
 
   STRING_STARTCHARS = ["'", '"']
 
@@ -13,7 +13,7 @@ class Saphyr::VM::Lexer
 
   COMMENT_CHARS = ["#"]
 
-  attr_accessor :index, :scanner, :source_code, :tokens
+  attr_accessor :index, :scanner, :source_code, :tokenized, :tokens
 
   def initialize source_code
     @source_code = source_code
@@ -21,9 +21,12 @@ class Saphyr::VM::Lexer
 
     @scanner = Saphyr::VM::Scanner.new source_code
     @index = -1
+    @tokenized = false
   end
 
   def tokenize
+    tokenized and return
+
     scanner.scan
     begin
       char = scanner.get
@@ -49,6 +52,8 @@ class Saphyr::VM::Lexer
         end
       end
     end while scanner.peek
+
+    self.tokenized = true
   end
 
   def tokenize_number char

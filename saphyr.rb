@@ -3,8 +3,8 @@ module Saphyr
     # require './saphyr/core/binding.rb'
     # require './saphyr/core/kernel.rb'
 
-    require './saphyr/core/method.rb'
     require './saphyr/core/object.rb'
+    require './saphyr/core/method.rb'
 
     require './saphyr/core/number.rb'
     require './saphyr/core/string.rb'
@@ -63,7 +63,7 @@ module Saphyr
     p "##############"
 
 
-    Saphyr::VM::Driver.new(File.open(file_path).read).process
+    Saphyr::VM::Driver.new(File.open(file_path).read).read
   end
 
 

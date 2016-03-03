@@ -8,8 +8,8 @@ class Saphyr::VM::Driver
     @object = Saphyr::Core::Object.new
   end
 
-  def process
+  def read
     parser.parse
-    Saphyr::VM::Compiler.new(object, parser.root).compile
+    Saphyr::VM::Compiler.new(object, object, parser.root).compile
   end
 end

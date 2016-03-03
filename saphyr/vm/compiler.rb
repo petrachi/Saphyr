@@ -1,17 +1,26 @@
 class Saphyr::VM::Compiler
+  KEYWORDS = {
+    "extend" => "dup_locals",
+    "methods" => "locals",
+    "print" => "print",
+    "self" => "__itself__"
+  }
+
   SYMBOL_TABLE = {
-    "=" => "assign",
     "==" => "equal",
     "+" => "add"
   }
 
-  def initialize object, root
+  attr_accessor :binding, :object, :root
+
+  def initialize object, binding, root
     @object = object
+    @binding = binding
     @root = root
   end
 
   def compile
-    @root.children.map do |node|
+    root.children.map do |node|
       compile_node node
     end.last
   end
@@ -33,13 +42,13 @@ class Saphyr::VM::Compiler
     end
   end
 
-  def subtree children
-    subtree = Saphyr::VM::Node.root
-    children.each do |child_node|
-      subtree.add_node child_node
-    end
-    subtree
-  end
+  # def subtree children
+  #   subtree = Saphyr::VM::Node.root
+  #   Array(children).each do |child_node|
+  #     subtree.add_node child_node
+  #   end
+  #   subtree
+  # end
 
   def compile_symbol node
     case node.token.content
@@ -47,17 +56,19 @@ class Saphyr::VM::Compiler
       # p " compile symbol ="
 
       method_name = node.children[0].token.content
-      method_ast = subtree node.children[1..-1]
+      method_parameters = node.children[0].children.map(&:token).map(&:content)
+      method_ast = Saphyr::VM::Node.subtree node.children[1..-1]
 
-      @object.define_method method_name, method_ast
+      # add args
+      object.define_method method_name, method_parameters, method_ast
+
     when "."
       # p " compile symbol ."
-
       subtree_object = compile_node node.children[0] # @object.exec_method node.children.shift.token.content
-      subtree_ast = subtree node.children[1..-1]
+      subtree_ast = Saphyr::VM::Node.subtree node.children[1..-1]
 
-      # p " warning: new subtree"
-      self.class.new(subtree_object, subtree_ast).compile
+      # p " warning: new subtree with #{subtree_object}"
+      Saphyr::VM::Compiler.new(subtree_object, binding, subtree_ast).compile
 
 
 
@@ -67,26 +78,71 @@ class Saphyr::VM::Compiler
 
       # I can't do these cases while methods don't accepts arguments
 
+      # Here, I must re-create an "regular" AST
+      # from
+      # symbol[child1, child2]
+      # to
+      # .[child1, symbol_to_identifier[child2]]
+      # then, compile it
+      #
+      # It means that I must be able to indiferently execute ruby or saphyr written methods
+      # So the 'add' method of string, for example, must be something that trigger execution when calling 'something.call self, parameters'
+      # I suggest using Procs
+
+
+
+
       # ???
     end
   end
 
   def compile_identifier node
     case node.token.content
-    when "Object"
-      # p " compile identifier Object"
-
-      Saphyr::Core::Object
-    when "self"
-      @object
-    when "methods", "print"
+    # when "Object"
+    #   # p " compile identifier Object"
+    #
+    #   Saphyr::Core::Object
+    when *KEYWORDS.keys
       # p "compile identifier methods or print"
 
-      @object.send(node.token.content)
+      # add args
+      # if we can transform ruby-written methods into procs stored in @locals, we will no longer need thoses
+      parameters = node.children.map do |child|
+        Saphyr::VM::Compiler.new(binding, binding, Saphyr::VM::Node.subtree(child)).compile
+      end
+      object.send KEYWORDS[node.token.content], *parameters
+
     else
+      local_name = node.token.content
+
+      unless object.find_local local_name
+        object.define_local local_name
+      end
+
+      local = object.find_local local_name
+#p "l #{local.class}"
+      case local
+      when Saphyr::Core::Method
+#p "meth"
+
+        # parameters = node.children.map &method("compile_node")
+        parameters = node.children.map do |child|
+          Saphyr::VM::Compiler.new(binding, binding, Saphyr::VM::Node.subtree(child)).compile
+        end
+
+        local.call object, parameters
+      when Saphyr::Core::Object
+#p "obj"
+        local
+
+      end
       # p " compile identifier other"
 
-      @object.exec_method node.token.content
+      # here, parameters are searched whithin the 'object', but I must search them in the current context/binding
+
+
+
+      # object.exec_local local_name, parameters
     end
 
     # args = node.children.map &method("compile_node")

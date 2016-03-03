@@ -1,14 +1,17 @@
 class Saphyr::VM::Scanner
-  attr_accessor :characters, :index, :source_code
+  attr_accessor :characters, :index, :scanned, :source_code
 
   def initialize source_code
     @source_code = source_code
     @characters = []
 
     @index = -1
+    @scanned = false
   end
 
   def scan
+    scanned and return
+
     index_number = 0
     line_number = 0
     column_number = 0
@@ -24,6 +27,8 @@ class Saphyr::VM::Scanner
         characters << Saphyr::VM::Character.new(char, index_number, line_number, column_number)
       end
     end
+
+    self.scanned = true
   end
 
   def get
